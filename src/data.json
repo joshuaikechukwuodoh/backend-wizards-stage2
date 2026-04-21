@@ -1,0 +1,32 @@
+[
+  {
+    "name": "John Doe",
+    "gender": "male",
+    "gender_probability": 0.99,
+    "age": 25,
+    "age_group": "adult",
+    "country_id": "NG",
+    "country_name": "Nigeria",
+    "country_probability": 0.85
+  },
+  {
+    "name": "Jane Smith",
+    "gender": "female",
+    "gender_probability": 0.98,
+    "age": 19,
+    "age_group": "teenager",
+    "country_id": "KE",
+    "country_name": "Kenya",
+    "country_probability": 0.92
+  },
+  {
+    "name": "Alice Johnson",
+    "gender": "female",
+    "gender_probability": 0.99,
+    "age": 32,
+    "age_group": "adult",
+    "country_id": "AO",
+    "country_name": "Angola",
+    "country_probability": 0.78
+  }
+]
