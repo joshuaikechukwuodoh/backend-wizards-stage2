@@ -3,28 +3,36 @@ import { getProfiles } from "./profiles";
 import type { Context } from "hono";
 
 export async function searchProfiles(c: Context) {
-  const q = c.req.query("q");
+  try {
+    const q = c.req.query("q");
 
-  if (!q) {
+    if (!q) {
+      return c.json(
+        { status: "error", message: "Missing query" },
+        { status: 400 }
+      );
+    }
+
+    const filters = parseQuery(q);
+
+    if (Object.keys(filters).length === 0) {
+      return c.json(
+        { status: "error", message: "Unable to interpret query" },
+        { status: 400 }
+      );
+    }
+
+    // Pass the parsed filters directly to getProfiles
+    return getProfiles(c, filters);
+  } catch (error: any) {
+    console.error("Error in searchProfiles:", error);
     return c.json(
-      { status: "error", message: "Missing query" },
-      { status: 400 }
+      {
+        status: "error",
+        message: "Internal server error",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined
+      },
+      { status: 500 }
     );
   }
-
-  const filters = parseQuery(q);
-
-  if (Object.keys(filters).length === 0) {
-    return c.json(
-      { status: "error", message: "Unable to interpret query" },
-      { status: 400 }
-    );
-  }
-
-  // update context req query with new filters
-  Object.entries(filters).forEach(([key, value]) => {
-    c.req.query()[key] = String(value);
-  });
-
-  return getProfiles(c);
 }
