@@ -9,6 +9,7 @@ const app = new Hono();
 app.use("*", cors());
 
 // routes
+app.get("/", (c) => c.json({ status: "success", message: "Backend Wizards Stage 2 API is running" }));
 app.get("/api/profiles", (c) => getProfiles(c));
 app.get("/api/profiles/search", (c) => searchProfiles(c));
 
