@@ -6,7 +6,7 @@ import { searchProfiles } from "./routes/search";
 
 const app = new Hono();
 
-app.use("*", cors());
+app.use("*", cors({ origin: "*" }));
 
 // routes
 app.get("/", (c) => c.json({ status: "success", message: "Backend Wizards Stage 2 API is running" }));
