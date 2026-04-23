@@ -8,5 +8,9 @@ if (!connectionString) {
 }
 
 // Disable prefetch as it is not supported for "Transaction" pool mode 
-export const client = postgres(connectionString, { prepare: false });
+export const client = postgres(connectionString, { 
+  prepare: false,
+  ssl: 'require',
+  max: 1 // Recommended for serverless to prevent connection exhaustion
+});
 export const db = drizzle(client);

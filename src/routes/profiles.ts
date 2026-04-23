@@ -7,6 +7,17 @@ export async function getProfiles(c: Context, filters?: any) {
   try {
     const q = filters || c.req.query();
 
+    // Strict validation for numeric parameters
+    const numericParams = ["min_age", "max_age", "min_gender_probability", "min_country_probability", "page", "limit"];
+    for (const param of numericParams) {
+      if (q[param] !== undefined && q[param] !== "" && isNaN(Number(q[param]))) {
+        return c.json(
+          { status: "error", message: "Invalid query parameters" },
+          { status: 422 }
+        );
+      }
+    }
+
     let conditions = [];
 
     if (q.gender) {
@@ -22,31 +33,23 @@ export async function getProfiles(c: Context, filters?: any) {
     }
 
     if (q.min_age) {
-      const minAge = Number(q.min_age);
-      if (!isNaN(minAge)) {
-        conditions.push(gte(profiles.age, minAge));
-      }
+      conditions.push(gte(profiles.age, Number(q.min_age)));
     }
 
     if (q.max_age) {
-      const maxAge = Number(q.max_age);
-      if (!isNaN(maxAge)) {
-        conditions.push(lte(profiles.age, maxAge));
-      }
+      conditions.push(lte(profiles.age, Number(q.max_age)));
     }
 
     if (q.min_gender_probability) {
-      const minProb = Number(q.min_gender_probability);
-      if (!isNaN(minProb)) {
-        conditions.push(gte(profiles.gender_probability, minProb));
-      }
+      conditions.push(
+        gte(profiles.gender_probability, Number(q.min_gender_probability))
+      );
     }
 
     if (q.min_country_probability) {
-      const minProb = Number(q.min_country_probability);
-      if (!isNaN(minProb)) {
-        conditions.push(gte(profiles.country_probability, minProb));
-      }
+      conditions.push(
+        gte(profiles.country_probability, Number(q.min_country_probability))
+      );
     }
 
     const whereClause = conditions.length ? and(...conditions) : undefined;
@@ -67,10 +70,10 @@ export async function getProfiles(c: Context, filters?: any) {
 
     // pagination
     let page = Number(q.page || 1);
-    if (isNaN(page) || page < 1) page = 1;
-
+    if (page < 1) page = 1;
+    
     let limit = Number(q.limit || 10);
-    if (isNaN(limit) || limit < 1) limit = 10;
+    if (limit < 1) limit = 10;
     limit = Math.min(limit, 50);
 
     const offset = (page - 1) * limit;

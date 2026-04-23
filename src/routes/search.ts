@@ -6,9 +6,9 @@ export async function searchProfiles(c: Context) {
   try {
     const q = c.req.query("q");
 
-    if (!q) {
+    if (!q || q.trim() === "") {
       return c.json(
-        { status: "error", message: "Missing query" },
+        { status: "error", message: "Missing or empty parameter" },
         { status: 400 }
       );
     }
