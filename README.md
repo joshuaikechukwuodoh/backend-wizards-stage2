@@ -1,13 +1,13 @@
 # Backend Wizards - Stage 2: Intelligence Query Engine
 
-This is the backend for Insighta Labs, providing advanced demographic intelligence with filtering, sorting, pagination, and natural language search. (Verified Production Build)
+This is the official backend implementation for Insighta Labs, providing advanced demographic intelligence with filtering, sorting, pagination, and a natural language search engine.
 
 # Natural Language Parsing Approach
 
-The natural language search endpoint (`/api/profiles/search?q=...`) uses a **rule-based keyword extraction** approach to convert plain English queries into structured filters.
+The natural language search endpoint (`/api/profiles/search?q=...`) uses a **Regular Expression-based keyword extraction** approach to accurately map plain English queries into structured filters.
 
 ### Supported Keywords and Mappings:
-- **Gender**: `male`, `males`, `female`, `females`.
+- **Gender**: `male`, `males`, `female`, `females`. (Uses word-boundary detection to distinguish between male/female).
 - **Age Ranges**:
     - `young`: Maps to `min_age=16` and `max_age=24`.
     - `above 30`: Maps to `min_age=30`.
@@ -16,31 +16,20 @@ The natural language search endpoint (`/api/profiles/search?q=...`) uses a **rul
 - **Age Groups**: `teenager`, `teenagers`, `adult`, `adults`.
 - **Countries**: `nigeria` (NG), `kenya` (KE), `angola` (AO).
 
-### How it works:
-The parser cleans the query, handles plural forms, and checks for specific tokens. If multiple keywords are found, they are combined into a single filter object. The `searchProfiles` endpoint returns a 200 status code even for uninterpretable queries, returning an empty list or the full dataset depending on implementation, and provides a `total` field in the response.
+### Logic Implementation:
+The parser converts the query to lowercase and applies specific Regex patterns. It handles plural forms and ensures that "female" is not accidentally matched as "male".
 
 # Limitations
 
-- **Strict Phrasing**: The parser looks for exact phrases like "above 30". It will not recognize variations like "older than 30".
-- **No Complex Logic**: It doesn't support Boolean logic (AND/OR) between different categories beyond simple combination.
-- **Limited Geography**: Only a specific set of countries are currently supported by the natural language parser.
-- **Conflict Handling**: If both "male" and "female" are mentioned, the gender filter is skipped.
+- **Syntactic Strictness**: The parser requires specific phrases like "above 30" or "below 20". It does not handle semantic variations like "older than 30".
+- **Geographic Scope**: Only a predefined set of countries (Nigeria, Kenya, Angola) are currently mapped in the natural language engine.
+- **Complex Logic**: It currently combines filters with AND logic and does not support OR conditions or nested queries.
+- **Ambiguity**: If both male and female are explicitly requested for a single gender field, the filter is omitted to allow all results.
 
 ---
 
-## Setup and Running
-
-To install dependencies:
-```bash
-bun install
-```
-
-To run the development server:
-```bash
-npm run dev
-```
-
-To seed the database with 2026 profiles:
-```bash
-bun run src/seed.ts
-```
+## Technical Details
+- **Stack**: Bun, Hono, Drizzle ORM, Postgres.js
+- **Database**: Neon (PostgreSQL)
+- **CORS**: Enabled for all origins (*)
+- **Data**: Seeded with 2026 profiles as per requirements.

@@ -1,56 +1,45 @@
 export function parseQuery(query: string) {
-  const words = query.toLowerCase().split(/\W+/);
+  const q = query.toLowerCase();
   const filters: any = {};
 
-  // gender - check female first or use whole word matching
-  if (words.includes("female") || words.includes("females")) {
+  // gender detection using Regex
+  const hasFemale = /females?/i.test(q);
+  const hasMale = /\bmales?\b/i.test(q); // \b ensures we don't match 'female' as 'male'
+
+  if (hasFemale && !hasMale) {
     filters.gender = "female";
-  } else if (words.includes("male") || words.includes("males")) {
+  } else if (hasMale && !hasFemale) {
     filters.gender = "male";
   }
 
-  // Conflict: if both are present, remove gender filter
-  if ((words.includes("female") || words.includes("females")) && (words.includes("male") || words.includes("males"))) {
-    delete filters.gender;
-  }
-
   // age ranges
-  if (words.includes("young")) {
+  if (/young/i.test(q)) {
     filters.min_age = 16;
     filters.max_age = 24;
   }
 
-  const qStr = " " + query.toLowerCase() + " ";
-  if (qStr.includes(" above 30 ")) {
+  if (/above 30/i.test(q)) {
     filters.min_age = 30;
-  } else if (qStr.includes(" above 17 ")) {
+  } else if (/above 17/i.test(q)) {
     filters.min_age = 17;
   }
 
-  if (qStr.includes(" below 20 ")) {
+  if (/below 20/i.test(q)) {
     filters.max_age = 20;
   }
 
   // age groups
-  if (words.includes("teenager") || words.includes("teenagers")) {
+  if (/teenagers?/i.test(q)) {
     filters.age_group = "teenager";
   }
-  if (words.includes("adult") || words.includes("adults")) {
+  if (/adults?/i.test(q)) {
     filters.age_group = "adult";
   }
 
   // countries
-  const countries: Record<string, string> = {
-    nigeria: "NG",
-    kenya: "KE",
-    angola: "AO"
-  };
-
-  for (const [name, id] of Object.entries(countries)) {
-    if (words.includes(name)) {
-      filters.country_id = id;
-    }
-  }
+  if (/nigeria/i.test(q)) filters.country_id = "NG";
+  if (/kenya/i.test(q)) filters.country_id = "KE";
+  if (/angola/i.test(q)) filters.country_id = "AO";
 
   return filters;
 }
