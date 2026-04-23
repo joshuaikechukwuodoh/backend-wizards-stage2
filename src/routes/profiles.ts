@@ -103,15 +103,18 @@ export async function getProfiles(c: Context, filters?: any) {
       .limit(limit)
       .offset(offset);
 
-    // GRAND TOTAL of all profiles in the database (as per assignment example showing 2026 for a filtered query)
-    const grandTotalResult = await db.select({ count: sql<string>`count(*)` }).from(profiles);
-    const total = Number(grandTotalResult[0]?.count ?? 0);
+    // Filtered total count (Total results across all pages for these filters)
+    const totalResult = await db
+      .select({ count: sql<string>`count(*)` })
+      .from(profiles)
+      .where(whereClause);
+    const total = Number(totalResult[0]?.count ?? 0);
 
     return c.json({
       status: "success",
-      page,
-      limit,
-      total,
+      page: Number(page),
+      limit: Number(limit),
+      total: Number(total),
       data
     });
   } catch (error: any) {
