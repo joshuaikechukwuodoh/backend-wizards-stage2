@@ -1,25 +1,43 @@
-export function parseQuery(q: string) {
-  q = q.toLowerCase();
-
+export function parseQuery(query: string) {
+  const q = " " + query.toLowerCase().replace(/[^a-z0-9]/g, " ") + " ";
   const filters: any = {};
 
   // gender
-  if (q.includes("male") && !q.includes("female")) filters.gender = "male";
-  if (q.includes("female") && !q.includes("male")) filters.gender = "female";
+  if (q.includes(" female ") || q.includes(" females ")) {
+    filters.gender = "female";
+  } else if (q.includes(" male ") || q.includes(" males ")) {
+    filters.gender = "male";
+  }
+
+  // Conflict handling
+  if ((q.includes(" male ") || q.includes(" males ")) && (q.includes(" female ") || q.includes(" females "))) {
+    delete filters.gender;
+  }
 
   // age
-  if (q.includes("young")) {
+  if (q.includes(" young ")) {
     filters.min_age = 16;
     filters.max_age = 24;
   }
 
-  if (q.includes("above 30")) filters.min_age = 30;
-  if (q.includes("above 17")) filters.min_age = 17;
-  if (q.includes("below 20")) filters.max_age = 20;
+  // Check more specific ranges first
+  if (q.includes(" above 30 ")) {
+    filters.min_age = 30;
+  } else if (q.includes(" above 17 ")) {
+    filters.min_age = 17;
+  }
+
+  if (q.includes(" below 20 ")) {
+    filters.max_age = 20;
+  }
 
   // age group
-  if (q.includes("teenager")) filters.age_group = "teenager";
-  if (q.includes("adult")) filters.age_group = "adult";
+  if (q.includes(" teenager ") || q.includes(" teenagers ")) {
+    filters.age_group = "teenager";
+  }
+  if (q.includes(" adult ") || q.includes(" adults ")) {
+    filters.age_group = "adult";
+  }
 
   // countries
   const countries: Record<string, string> = {
@@ -28,9 +46,9 @@ export function parseQuery(q: string) {
     angola: "AO"
   };
 
-  for (const c in countries) {
-    if (q.includes(c)) {
-      filters.country_id = countries[c];
+  for (const [name, id] of Object.entries(countries)) {
+    if (q.includes(` ${name} `)) {
+      filters.country_id = id;
     }
   }
 

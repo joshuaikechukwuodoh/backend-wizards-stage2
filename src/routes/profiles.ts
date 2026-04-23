@@ -5,7 +5,8 @@ import type { Context } from "hono";
 
 export async function getProfiles(c: Context, filters?: any) {
   try {
-    const q = filters || c.req.query();
+    // Merge filters (from NLP) with query params (page, limit, etc)
+    const q = { ...c.req.query(), ...filters };
 
     // Strict validation for numeric parameters
     const numericParams = ["min_age", "max_age", "min_gender_probability", "min_country_probability", "page", "limit"];
@@ -13,9 +14,25 @@ export async function getProfiles(c: Context, filters?: any) {
       if (q[param] !== undefined && q[param] !== "" && isNaN(Number(q[param]))) {
         return c.json(
           { status: "error", message: "Invalid query parameters" },
-          { status: 422 }
+          { status: 400 }
         );
       }
+    }
+
+    // Validate sort_by and order
+    const validSortBy = ["age", "created_at", "gender_probability"];
+    if (q.sort_by && !validSortBy.includes(q.sort_by)) {
+      return c.json(
+        { status: "error", message: "Invalid query parameters" },
+        { status: 400 }
+      );
+    }
+
+    if (q.order && !["asc", "desc"].includes(q.order.toLowerCase())) {
+      return c.json(
+        { status: "error", message: "Invalid query parameters" },
+        { status: 400 }
+      );
     }
 
     let conditions = [];

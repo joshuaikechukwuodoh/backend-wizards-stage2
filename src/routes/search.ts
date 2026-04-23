@@ -15,13 +15,6 @@ export async function searchProfiles(c: Context) {
 
     const filters = parseQuery(q);
 
-    if (Object.keys(filters).length === 0 && q.trim().length > 0) {
-      return c.json(
-        { status: "error", message: "Unable to interpret query" },
-        { status: 200 }
-      );
-    }
-
     if (Object.keys(filters).length === 0) {
       return c.json(
         { status: "error", message: "Unable to interpret query" },
