@@ -103,19 +103,19 @@ export async function getProfiles(c: Context, filters?: any) {
       .limit(limit)
       .offset(offset);
 
-    // Filtered total count (Total results across all pages for these filters)
+    // Filtered total count
     const totalResult = await db
       .select({ count: sql<string>`count(*)` })
       .from(profiles)
       .where(whereClause);
-    const total = Number(totalResult[0]?.count ?? 0);
+    const totalCount = Number(totalResult[0]?.count ?? 0);
 
     return c.json({
       status: "success",
       page: Number(page),
       limit: Number(limit),
-      total: Number(total),
-      data
+      total: totalCount,
+      data: data
     });
   } catch (error: any) {
     console.error("Error fetching profiles:", error);
